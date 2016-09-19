@@ -1,68 +1,45 @@
 <?php
 namespace App\Controller;
 
+use Cake\Core\Configure;
+
 class SessionController extends AppController
 {
     /**
+     * This is all it takes to reproduce.
+     */
+    public function index() {
+        $user = $this->read_session();
+        if($user) {
+            // session already exists.
+            $this->set('message','Okay, we are ready. Truncate the session table and refresh the page.');
+            return;
+        }
+
+        // attempt to restore
+        $this->restore_session();
+        $this->set('message','Session was restored');
+    }
+
+    /**
+     * This is basically what the Auth component does to see if a user is already authorized. Note that it does not
+     * start the session. So the first entry point for a session is an attempted read (which triggers the session object
+     * to start the session).
      *
+     * @return null|string
      */
-    public function initialize()
+    private function read_session()
     {
-        $this->loadComponent('Cookie');
-
-        $this->Cookie->configKey('demoCookie', [
-            'expires' => '+1 months',
-            'encryption' => false,
-            'httpOnly' => true
-        ]);
-
-        parent::initialize();
+        return $this->request->session()->read('user');
     }
 
     /**
-     * Displays a list of options.
+     * This is basically when the Auth component does when it's told to manually authorize a user (i.e. restoring
+     * a login session from a cookie).
      */
-    public function index()
-    {
-    }
-
-    /**
-     * Starts a session.
-     */
-    public function start()
-    {
-        $this->request->session()->start();
-        $this->request->session()->write('test','this string is stored in the session via start()');
-
-        $this->Flash->success('Session has been started.');
-
-        // avoid usage of redirect, because there could be warnings
-        $this->render('index');
-    }
-
-    /**
-     * Ends a session.
-     */
-    public function end()
-    {
-        $this->request->session()->destroy();
-
-        $this->Flash->success('Session has been ended.');
-
-        // avoid usage of redirect, because there could be warnings
-        $this->render('index');
-    }
-
-    /**
-     * Restores a session.
-     */
-    public function restore()
+    private function restore_session()
     {
         $this->request->session()->renew();
-
-        $this->Flash->success('Session has been restored.');
-
-        // avoid usage of redirect, because there could be warnings
-        $this->render('index');
+        $this->request->session()->write('user', 'John Smith');
     }
 }

@@ -342,7 +342,10 @@ return [
      */
     'Session' => [
         'cookie' => 'demo',
-        'defaults' => 'php',
+        'defaults' => 'database',
         'timeout' => 1,
+        'handler' => [
+            'model' => 'UserSessions'
+        ]
     ],
 ];
