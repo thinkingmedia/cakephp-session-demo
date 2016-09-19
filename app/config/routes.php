@@ -30,6 +30,8 @@ Router::scope('/', function (RouteBuilder $routes) {
         'controller' => 'Session',
         'action' => 'index'
     ]);
+
+    $routes->fallbacks(DashedRoute::class);
 });
 
 Plugin::routes();
